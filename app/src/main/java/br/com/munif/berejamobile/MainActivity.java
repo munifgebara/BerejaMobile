@@ -74,34 +74,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void alterar() {
-        RestAsyncTask rat=new RestAsyncTask(this,"http://munif.com.br/bereja/api/cervejaria/");
+        RestAsyncTask<Cervejaria> rat=new RestAsyncTask<>(Cervejaria.class, this,"http://munif.com.br/bereja/api/cervejaria/");
         Cervejaria cervejaria=new Cervejaria();
         cervejaria.setId(Long.parseLong(etId.getText().toString()));
         cervejaria.setNome(etNome.getText().toString());
-        rat.put(cervejaria);
+        rat.put(cervejaria.getId(),cervejaria);
     }
 
     private void inserir() {
-        RestAsyncTask rat=new RestAsyncTask(this,"http://munif.com.br/bereja/api/cervejaria/");
+        RestAsyncTask<Cervejaria> rat=new RestAsyncTask<>(Cervejaria.class,this,"http://munif.com.br/bereja/api/cervejaria/");
         Cervejaria cervejaria=new Cervejaria();
         cervejaria.setNome(etNome.getText().toString());
         rat.post(cervejaria);
     }
 
     private void listar() {
-        RestAsyncTask rat=new RestAsyncTask(this,"http://munif.com.br/bereja/api/cervejaria/");
+        RestAsyncTask<Cervejaria> rat=new RestAsyncTask<>(Cervejaria.class,this,"http://munif.com.br/bereja/api/cervejaria/");
         rat.getAll();
     }
 
     private void consultar(){
         Long id=Long.parseLong(etId.getText().toString());
-        RestAsyncTask rat=new RestAsyncTask(this,"http://munif.com.br/bereja/api/cervejaria/");
+        RestAsyncTask<Cervejaria> rat=new RestAsyncTask<>(Cervejaria.class,this,"http://munif.com.br/bereja/api/cervejaria/");
         rat.get(id);
     }
 
     private void excluir(){
         Long id=Long.parseLong(etId.getText().toString());
-        RestAsyncTask rat=new RestAsyncTask(this,"http://munif.com.br/bereja/api/cervejaria/");
+        RestAsyncTask<Cervejaria> rat=new RestAsyncTask<>(Cervejaria.class,this,"http://munif.com.br/bereja/api/cervejaria/");
         rat.delete(id);
     }
 

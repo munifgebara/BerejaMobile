@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -17,14 +19,15 @@ import java.util.List;
 /**
  * Created by munif on 14/05/16.
  */
-public class RestAsyncTask extends AsyncTask {
+public class RestAsyncTask<T> extends AsyncTask {
 
     private RestAsyncTaskListener listener;
     private String endereco;
     private ObjectMapper om;
+    private Class clazz;
 
 
-    public RestAsyncTask(RestAsyncTaskListener listener,String endereco) {
+    public RestAsyncTask(Class clazz,RestAsyncTaskListener listener,String endereco) {
         super();
         this.listener=listener;
         this.endereco=endereco;
@@ -32,6 +35,10 @@ public class RestAsyncTask extends AsyncTask {
         om.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         om.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"));
         om.enable(DeserializationFeature.USE_LONG_FOR_INTS);
+        //TODO NÃO Funciona no JAVA 6
+        //this.clazz = (Class<?>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        this.clazz = clazz;
+
     }
 
 
@@ -65,12 +72,12 @@ public class RestAsyncTask extends AsyncTask {
     public void getAll() {
         this.execute(new RequisicaoGetAll());
     }
-    public void post(Cervejaria cervejaria) {
-        this.execute(new RequisicaoPost(cervejaria));
+    public void post(T objeto) {
+        this.execute(new RequisicaoPost(objeto));
     }
-    public void put(Cervejaria cervejaria) {
+    public void put(Object id,T objeto) {
 
-        this.execute(new RequisicaoPut(cervejaria));
+        this.execute(new RequisicaoPut(id,objeto));
     }
     public void delete(Long id) {
         this.execute(new RequisicaoDelete(id));
@@ -93,7 +100,7 @@ public class RestAsyncTask extends AsyncTask {
 
         @Override
         public Object requisita() {
-            List<Cervejaria> resposta=new ArrayList<>();
+            List<T> resposta=new ArrayList<>();
             URL url=null;
             try {
                 url = new URL(endereco+id);
@@ -102,8 +109,8 @@ public class RestAsyncTask extends AsyncTask {
                 urc.connect();
                 InputStream in=urc.getInputStream();
                 publishProgress("Lendo");
-                Cervejaria cervejaria = om.readValue(in, Cervejaria.class);
-                resposta.add(cervejaria);
+                Object o = om.readValue(in, clazz);
+                resposta.add((T)o);
                 publishProgress("Fim");
                 urc.disconnect();
             }
@@ -121,7 +128,8 @@ public class RestAsyncTask extends AsyncTask {
 
         @Override
         public Object requisita() {
-            List<Cervejaria> resposta=new ArrayList<>();
+            List<T> resposta=new ArrayList<>();
+
             URL url=null;
             try {
                 url = new URL(endereco);
@@ -130,13 +138,12 @@ public class RestAsyncTask extends AsyncTask {
                 urc.connect();
                 InputStream in=urc.getInputStream();
                 publishProgress("Lendo");
-                Cervejaria[] cervejarias = om.readValue(in, Cervejaria[].class);
-                resposta.addAll(Arrays.asList(cervejarias));
-                publishProgress("Recuperados "+resposta.size());
+                resposta = om.readValue(in, om.getTypeFactory().constructCollectionType(List.class, clazz));
+                publishProgress("Recuperados " + resposta.size());
                 urc.disconnect();
             }
             catch (Exception ex){
-                publishProgress("Problemas recuperando " + url.getPath() + "\n" + ex.toString());
+                publishProgress("Problemas recuperando " + url.getPath() + "\n" + ex.getLocalizedMessage());
             }
             return resposta;
         }
@@ -151,7 +158,7 @@ public class RestAsyncTask extends AsyncTask {
 
         @Override
         public Object requisita() {
-            List<Cervejaria> resposta=new ArrayList<>();
+            List<T> resposta=new ArrayList<>();
             URL url=null;
             try {
                 url = new URL(endereco+id);
@@ -161,62 +168,64 @@ public class RestAsyncTask extends AsyncTask {
                 urc.connect();
                 InputStream in=urc.getInputStream();
                 publishProgress("Lendo");
-                Cervejaria cervejaria = om.readValue(in, Cervejaria.class);
-                resposta.add(cervejaria);
-                publishProgress("Excluido "+cervejaria.getNome());
+                Object o = om.readValue(in, clazz);
+                resposta.add((T)o);
+                publishProgress("Excluido "+o);
                 urc.disconnect();
             }
             catch (Exception ex){
-                publishProgress("Problemas recuperando " + url.getPath() + "\n" + ex.toString());
+                publishProgress("Problemas excluindo " + url.getPath() + "\n" + ex.getLocalizedMessage());
             }
             return resposta;
         }
     }
     class RequisicaoPut implements Requisicao{
 
-        private Cervejaria cervejaria;
+        private T objeto;
+        private Object id;
 
-        public RequisicaoPut(Cervejaria cervejaria){
-            this.cervejaria=cervejaria;
+        public RequisicaoPut(Object id,T objeto){
+            this.id=id;
+            this.objeto=objeto;
         }
 
         @Override
         public Object requisita() {
-            List<Cervejaria> resposta=new ArrayList<>();
+            List<T> resposta=new ArrayList<>();
             URL url=null;
             try {
-                url = new URL(endereco+cervejaria.getId());
+                url = new URL(endereco+id);
                 publishProgress("Conectando");
                 HttpURLConnection urc = (HttpURLConnection) url.openConnection();
                 urc.setRequestMethod("PUT");
                 urc.connect();
                 OutputStream out=urc.getOutputStream();
-                out.write(om.writeValueAsBytes(cervejaria));
+                out.write(om.writeValueAsBytes(objeto));
 
                 InputStream in=urc.getInputStream();
                 publishProgress("Lendo");
-                Cervejaria c = om.readValue(in, Cervejaria.class);
-                resposta.add(c);
-                publishProgress("Alterado "+c.getId());
+                Object c = om.readValue(in, clazz);
+                resposta.add((T)c);
+                publishProgress("Alterado "+c);
                 urc.disconnect();
             }
             catch (Exception ex){
-                publishProgress("Problemas recuperando " + url.getPath() + "\n" + ex.toString());
+                publishProgress("Problemas alterando " + url.getPath() + "\n" + ex.getLocalizedMessage());
             }
             return resposta;
         }
     }
     class RequisicaoPost implements Requisicao{
 
-        private Cervejaria cervejaria;
+        private T objeto;
 
-        public RequisicaoPost(Cervejaria cervejaria){
-            this.cervejaria=cervejaria;
+        public RequisicaoPost(T objeto){
+            this.objeto=objeto;
         }
 
         @Override
         public Object requisita() {
-            List<Cervejaria> resposta=new ArrayList<>();
+            List<T> resposta=new ArrayList<>();
             URL url=null;
             try {
                 url = new URL(endereco);
@@ -225,16 +234,16 @@ public class RestAsyncTask extends AsyncTask {
                 urc.setRequestMethod("POST");
                 urc.connect();
                 OutputStream out=urc.getOutputStream();
-                out.write(om.writeValueAsBytes(cervejaria));
+                out.write(om.writeValueAsBytes(objeto));
                 InputStream in=urc.getInputStream();
                 publishProgress("Lendo");
-                Cervejaria c = om.readValue(in, Cervejaria.class);
-                resposta.add(c);
-                publishProgress("Inserido "+c.getId());
+                Object c = om.readValue(in, clazz);
+                resposta.add((T)c);
+                publishProgress("Inserido "+c);
                 urc.disconnect();
             }
             catch (Exception ex){
-                publishProgress("Problemas recuperando " + url.getPath() + "\n" + ex.toString());
+                publishProgress("Problemas inserindo " + url.getPath() + "\n" + ex.getLocalizedMessage());
             }
             return resposta;
         }
