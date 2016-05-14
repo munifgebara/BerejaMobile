@@ -53,6 +53,11 @@ public class RestAsyncTask<T> extends AsyncTask {
     @Override
     protected void onPostExecute(Object o) {
         listener.onPostExecute(o);
+        afterExecute();
+    }
+
+    protected void afterExecute(){
+
     }
 
     @Override

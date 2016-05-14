@@ -10,6 +10,7 @@
         android:text="Id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:editable="false"
         />
 
     <EditText
@@ -21,7 +22,8 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:editable="false" />
 
     <TextView
         android:id="@+id/tvNome"
@@ -44,46 +46,37 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Consultar"
-        android:id="@+id/btConsultar"
-        android:layout_below="@+id/etNome"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="Novo"
         android:id="@+id/btNovo"
-        android:layout_alignBottom="@+id/btConsultar"
-        android:layout_alignRight="@+id/etNome"
-        android:layout_alignEnd="@+id/etNome" />
+        android:layout_below="@+id/etNome"
+        android:layout_alignRight="@+id/lvLista"
+        android:layout_alignEnd="@+id/lvLista" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Excluir"
         android:id="@+id/btExcluir"
-        android:layout_below="@+id/btConsultar"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/etNome" />
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Listar"
         android:id="@+id/btListar"
-        android:layout_below="@+id/btExcluir"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_below="@+id/etNome"
+        android:layout_toRightOf="@+id/btExcluir"
+        android:layout_toEndOf="@+id/btExcluir" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Alterar"
         android:id="@+id/btAlterar"
-        android:layout_alignBottom="@+id/btExcluir"
-        android:layout_alignLeft="@+id/btNovo"
-        android:layout_alignStart="@+id/btNovo" />
+        android:layout_below="@+id/etNome"
+        android:layout_toLeftOf="@+id/btNovo"
+        android:layout_toStartOf="@+id/btNovo" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -95,5 +88,15 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/lvLista"
+        android:layout_toRightOf="@+id/tvId"
+        android:layout_toEndOf="@+id/tvId"
+        android:layout_below="@+id/btExcluir"
+        android:layout_above="@+id/tvStatus" />
+
 
 </RelativeLayout>

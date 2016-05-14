@@ -30,9 +30,7 @@ public class Cervejaria {
 
     @Override
     public String toString() {
-        return "Cervejaria{" +
-                "id=" + id +
-                ", nome='" + nome + '\'' +
-                '}';
+        return nome + '(' + id + ')';
     }
+
 }
